@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prototype Boilerplate | CreaBeast VPS",
+  title: "n8n AI Automation & Monday.com Integration Hub | Lead Engineer Prototype",
   description:
-    "Production-ready Next.js starter boilerplate tailored for Traefik VPS deployment and autonomous agy agents.",
+    "Production-grade n8n workflow canvas simulator, AI OCR structured extraction playground, Monday.com bi-directional sync, and BI automation observability.",
 };
 
 export default function RootLayout({

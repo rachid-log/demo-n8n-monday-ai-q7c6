@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String?
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   projects  Project[]
 }
 
@@ -26,4 +26,90 @@ model Project {
   updatedAt   DateTime @updatedAt
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Workflow {
+  id           String              @id @default(cuid())
+  name         String
+  slug         String              @unique
+  category     String              @default("Finance / AP")
+  triggerType  String              @default("Webhook")
+  status       String              @default("active")
+  totalRuns    Int                 @default(0)
+  successRate  Float               @default(100.0)
+  avgDurationMs Int                @default(1800)
+  nodesConfig  String              @db.Text
+  executions   WorkflowExecution[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model WorkflowExecution {
+  id            String    @id @default(cuid())
+  workflowId    String
+  workflow      Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status        String    @default("SUCCESS") // SUCCESS, FAILED, RUNNING, RETRYING
+  triggeredBy   String    @default("Webhook (Doc Intake)")
+  durationMs    Int       @default(0)
+  errorStep     String?
+  errorMsg      String?
+  retryCount    Int       @default(0)
+  payloadIn     String?   @db.Text
+  payloadOut    String?   @db.Text
+  nodeSnapshots String?   @db.Text
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+}
+
+model DocumentRecord {
+  id            String   @id @default(cuid())
+  title         String
+  documentType  String   @default("INVOICE") // INVOICE, CONTRACT, RECEIPT, LEAD_INTAKE
+  fileType      String   @default("pdf")
+  status        String   @default("PROCESSED") // PROCESSED, PROCESSING, FAILED, PENDING_SYNC
+  rawText       String   @db.Text
+  extractedJson String   @db.Text
+  ocrConfidence Float    @default(98.5)
+  tokensUsed    Int      @default(1250)
+  syncStatus    String   @default("SYNCED") // SYNCED, PENDING, FAILED
+  mondayItemId  String?
+  mondayBoardId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MondayBoard {
+  id             String       @id @default(cuid())
+  name           String
+  boardType      String       @default("ACCOUNTS_PAYABLE") // ACCOUNTS_PAYABLE, CRM_LEADS, LEGAL_REVIEW
+  workspaceName  String       @default("Global Operations Hub")
+  columnsConfig  String       @db.Text
+  items          MondayItem[]
+  lastSyncAt     DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model MondayItem {
+  id           String      @id @default(cuid())
+  boardId      String
+  board        MondayBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  name         String
+  status       String      @default("Synced") // Approved, Needs Review, Pending OCR, Synced, Paid, Rejected
+  priority     String      @default("Medium") // Critical, High, Medium, Low
+  columnValues String      @db.Text
+  syncSource   String      @default("n8n_webhook")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model AutomationMetric {
+  id           String   @id @default(cuid())
+  metricKey    String   @unique
+  label        String
+  value        String
+  numericValue Float    @default(0.0)
+  changePct    Float    @default(0.0)
+  category     String   @default("kpi")
+  updatedAt    DateTime @updatedAt
 }

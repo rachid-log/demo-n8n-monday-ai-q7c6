@@ -18,8 +18,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${COMPOSE_PROJECT_NAME:-prototype}-${SUBDOMAIN:-demo}:latest
-    container_name: ${COMPOSE_PROJECT_NAME:-prototype}-${SUBDOMAIN:-demo}-web
+    image: demo-n8n-monday-ai-q7c6-n8n-monday-ai-q7c6:latest
+    container_name: demo-n8n-monday-ai-q7c6-n8n-monday-ai-q7c6-web
     restart: unless-stopped
     env_file:
       - .env
@@ -27,7 +27,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
-      - SUBDOMAIN=${SUBDOMAIN:-demo}
+      - SUBDOMAIN=n8n-monday-ai-q7c6
       - DATABASE_URL=${DATABASE_URL:-}
     stop_grace_period: 30s
 
@@ -38,13 +38,13 @@ services:
 
     # ── Traefik reverse proxy routing ─────────────────────────────────────────
     # Dynamically registered with Traefik v2+ on the shared root_default network.
-    # Router name is scoped to ${SUBDOMAIN:-demo} to avoid collisions between prototypes.
+    # Router name is scoped to n8n-monday-ai-q7c6 to avoid collisions between prototypes.
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${SUBDOMAIN:-demo}.rule=Host(`${SUBDOMAIN:-demo}.creabeast.com`)"
-      - "traefik.http.routers.${SUBDOMAIN:-demo}.entrypoints=websecure"
-      - "traefik.http.routers.${SUBDOMAIN:-demo}.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.${SUBDOMAIN:-demo}.loadbalancer.server.port=3000"
+      - "traefik.http.routers.n8n-monday-ai-q7c6.rule=Host(`n8n-monday-ai-q7c6.creabeast.com`)"
+      - "traefik.http.routers.n8n-monday-ai-q7c6.entrypoints=websecure"
+      - "traefik.http.routers.n8n-monday-ai-q7c6.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.n8n-monday-ai-q7c6.loadbalancer.server.port=3000"
       - "traefik.docker.network=root_default"
 
     networks:
@@ -69,7 +69,7 @@ services:
   # Isolated entirely within the stack's private `default` network (never on root_default).
   db:
     image: postgres:16-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-prototype}-${SUBDOMAIN:-demo}-db
+    container_name: demo-n8n-monday-ai-q7c6-n8n-monday-ai-q7c6-db
     profiles:
       - with-db
     restart: unless-stopped
@@ -102,5 +102,5 @@ networks:
   default:
   root_default:
     # Pre-existing external network managed by Traefik.
-    # Joining it allows Traefik to route https://${SUBDOMAIN}.creabeast.com -> web:3000
+    # Joining it allows Traefik to route https://n8n-monday-ai-q7c6.creabeast.com -> web:3000
     external: true
