@@ -33,6 +33,15 @@ export default function CommandCenter() {
     "canvas" | "playground" | "analytics" | "monday" | "audit"
   >("canvas");
 
+  // Theme state defaulting to clean, modern White Mode as requested
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("agy_theme") as "light" | "dark" | null;
+      if (saved) return saved;
+    }
+    return "light";
+  });
+
   const [workflows, setWorkflows] = useState<WorkflowItem[]>(FALLBACK_WORKFLOWS);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowItem | null>(
     FALLBACK_WORKFLOWS[0]
@@ -45,6 +54,23 @@ export default function CommandCenter() {
   const [isQuickRunning, setIsQuickRunning] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Synchronize document dark class with active theme
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("agy_theme", nextTheme);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -189,7 +215,7 @@ export default function CommandCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-neutral-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-800 dark:selection:text-emerald-300 transition-colors duration-200">
       {/* Top Navigation */}
       <HeaderNav
         activeTab={activeTab}
@@ -198,12 +224,14 @@ export default function CommandCenter() {
         onResetDemo={handleResetDemo}
         isQuickRunning={isQuickRunning}
         isResetting={isResetting}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* Floating Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-neutral-900/95 border border-emerald-500/40 text-emerald-300 text-xs font-medium shadow-2xl backdrop-blur-md flex items-center gap-2.5 animate-in slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-white dark:bg-neutral-900/95 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold shadow-2xl backdrop-blur-md flex items-center gap-2.5 animate-in slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -252,44 +280,44 @@ export default function CommandCenter() {
         )}
 
         {/* Architecture & Engineering Footnotes */}
-        <section className="pt-8 border-t border-neutral-800/80">
+        <section className="pt-8 border-t border-slate-200 dark:border-neutral-800/80">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800">
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 mb-1">
+            <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/40 border border-slate-200 dark:border-neutral-800 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">
                 <Globe className="w-4 h-4" />
                 <span>Traefik Reverse Proxy</span>
               </div>
-              <p className="text-[11px] text-neutral-400">
-                SSL termination via Let&apos;s Encrypt TLS challenge on <code className="text-neutral-300 font-mono">root_default</code> network.
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
+                SSL termination via Let&apos;s Encrypt TLS challenge on <code className="text-slate-800 dark:text-neutral-300 font-mono">root_default</code> network.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400 mb-1">
+            <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/40 border border-slate-200 dark:border-neutral-800 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-cyan-700 dark:text-cyan-400 mb-1">
                 <Cpu className="w-4 h-4" />
                 <span>n8n Core Orchestrator</span>
               </div>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
                 Multi-step event queues with exponential retry policies, schema guards, and dead-lettering.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800">
-              <div className="flex items-center gap-2 text-xs font-semibold text-amber-400 mb-1">
+            <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/40 border border-slate-200 dark:border-neutral-800 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">
                 <Layers className="w-4 h-4" />
                 <span>Monday.com Integration</span>
               </div>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
                 Bi-directional GraphQL mutations with column mapping for Accounts Payable and CRM boards.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800">
-              <div className="flex items-center gap-2 text-xs font-semibold text-purple-400 mb-1">
+            <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/40 border border-slate-200 dark:border-neutral-800 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-400 mb-1">
                 <ShieldCheck className="w-4 h-4" />
                 <span>AI Vision OCR &amp; GPT-4o</span>
               </div>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
                 Structured JSON schema enforcement with token budgeting and OCR confidence scoring.
               </p>
             </div>
@@ -298,7 +326,7 @@ export default function CommandCenter() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-800/80 py-6 text-center text-xs text-neutral-500 font-mono bg-neutral-950">
+      <footer className="border-t border-slate-200 dark:border-neutral-800/80 py-6 text-center text-xs text-slate-500 dark:text-neutral-500 font-mono bg-white dark:bg-neutral-950 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>n8n AI Automation &amp; Monday.com Integration Hub • Designed &amp; Built by Rachid</span>
           <span>Next.js 16 • Tailwind CSS v4 • PostgreSQL • Prisma ORM</span>
